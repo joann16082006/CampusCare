@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CampusCare Dashboard</title>
+</head>
+<body>
+    <h1>CampusCare Dashboard</h1>
+
+    <h2>Welcome, {{ request.user.username }}!</h2>
+    <p>Role: {{ request.user.profile.get_role_display }}</p>
+
+    {% if role == 'STUDENT' %}
+        <h3>Student Services</h3>
+        <p><a href="{% url 'submit_grievance' %}">Submit a Grievance</a></p>
+        <p><a href="{% url 'my_grievances' %}">View My Grievances</a></p>
+    {% endif %}
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Log Out</button>
+    </form>
+</body>
+</html>

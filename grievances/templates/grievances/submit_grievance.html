@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submit Grievance - CampusCare</title>
+</head>
+<body>
+    <h1>Submit a Grievance</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit Grievance</button>
+    </form>
+
+    <p><a href="{% url 'my_grievances' %}">View My Grievances</a></p>
+    <p><a href="{% url 'dashboard' %}">Back to Dashboard</a></p>
+</body>
+</html>

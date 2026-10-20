@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CampusCare - Register</title>
+</head>
+<body>
+    <h1>CampusCare</h1>
+    <h2>Create an Account</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+    <div style="color: red;">
+        {{ form.errors }}
+    </div>
+{% endif %}
+
+{{ form.as_p }}
+        <button type="submit">Register</button>
+    </form>
+    <p>Already registered? <a href="{% url 'login' %}">Login</a></p>
+</body>
+</html>

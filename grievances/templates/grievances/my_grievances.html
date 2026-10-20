@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Grievances - CampusCare</title>
+</head>
+<body>
+    <h1>My Grievances</h1>
+
+    {% if grievances %}
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Submitted On</th>
+            </tr>
+            {% for grievance in grievances %}
+                <tr>
+                    <td>{{ grievance.title }}</td>
+                    <td>{{ grievance.get_category_display }}</td>
+                    <td>{{ grievance.description }}</td>
+                    <td>{{ grievance.get_status_display }}</td>
+                    <td>{{ grievance.created_at|date:"d-m-Y H:i" }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>You have not submitted any grievances yet.</p>
+    {% endif %}
+
+    <p><a href="{% url 'submit_grievance' %}">Submit a New Grievance</a></p>
+    <p><a href="{% url 'dashboard' %}">Back to Dashboard</a></p>
+</body>
+</html>
