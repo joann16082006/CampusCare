@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusCare - Staff Grievances</title>
+</head>
+<body>
+    <h1>CampusCare</h1>
+    <h2>Staff Grievance Dashboard</h2>
+
+    <p>
+        <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+    </p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if grievances %}
+        <table border="1" cellpadding="8" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Student</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                    <th>Update Status</th>
+                    <th>History</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grievance in grievances %}
+                    <tr>
+                        <td>{{ grievance.title }}</td>
+                        <td>{{ grievance.student.username }}</td>
+                        <td>{{ grievance.get_category_display }}</td>
+                        <td>{{ grievance.description }}</td>
+                        <td>{{ grievance.created_at }}</td>
+                        <td>{{ grievance.get_status_display }}</td>
+                        <td>
+                            <form method="post" action="{% url 'update_grievance_status' grievance.id %}">
+                                {% csrf_token %}
+                                <select name="status" required>
+                                    {% for value, label in grievance.STATUS_CHOICES %}
+                                        <option value="{{ value }}" {% if grievance.status == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit">Save</button>
+                            </form>
+                        </td>
+                        <td>
+                            <a href="{% url 'grievance_history' grievance.id %}">View History</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No grievances have been submitted yet.</p>
+    {% endif %}
+</body>
+</html>

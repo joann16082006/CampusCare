@@ -1,6 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.views.decorators.http import require_POST
+from django.db import transaction
+
 from .forms import GrievanceForm
-from .models import Grievance
+from .models import Grievance, GrievanceHistory
 from accounts.decorators import role_required
 
 
@@ -34,4 +38,77 @@ def my_grievances(request):
         request,
         'grievances/my_grievances.html',
         {'grievances': grievances}
+    )
+
+
+@role_required('STAFF')
+def staff_grievances(request):
+    grievances = Grievance.objects.select_related(
+        'student'
+    ).order_by('-created_at')
+
+    return render(
+        request,
+        'grievances/staff_grievances.html',
+        {'grievances': grievances}
+    )
+
+
+@role_required('STAFF')
+@require_POST
+def update_grievance_status(request, grievance_id):
+    with transaction.atomic():
+        grievance = get_object_or_404(
+            Grievance.objects.select_for_update(),
+            pk=grievance_id
+        )
+
+        new_status = request.POST.get('status', '')
+        allowed_statuses = dict(Grievance.STATUS_CHOICES)
+
+        if new_status not in allowed_statuses:
+            messages.error(request, 'Please select a valid status.')
+            return redirect('staff_grievances')
+
+        previous_status = grievance.status
+
+        if new_status != previous_status:
+            grievance.status = new_status
+            grievance.save(update_fields=['status'])
+
+            GrievanceHistory.objects.create(
+                grievance=grievance,
+                staff=request.user,
+                previous_status=previous_status,
+                new_status=new_status,
+            )
+
+            messages.success(
+                request,
+                f'Status updated to {allowed_statuses[new_status]}.'
+            )
+        else:
+            messages.info(
+                request,
+                'The grievance already has that status.'
+            )
+
+    return redirect('staff_grievances')
+
+
+@role_required('STAFF')
+def grievance_history(request, grievance_id):
+    grievance = get_object_or_404(Grievance, pk=grievance_id)
+
+    history = grievance.history.select_related(
+        'staff'
+    ).order_by('-changed_at')
+
+    return render(
+        request,
+        'grievances/grievance_history.html',
+        {
+            'grievance': grievance,
+            'history': history,
+        }
     )

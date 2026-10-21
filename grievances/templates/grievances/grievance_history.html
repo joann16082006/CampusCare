@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusCare - Grievance History</title>
+</head>
+<body>
+    <h1>CampusCare</h1>
+    <h2>Grievance Status History</h2>
+
+    <p>
+        <a href="{% url 'staff_grievances' %}">Back to Staff Dashboard</a>
+    </p>
+
+    <h3>{{ grievance.title }}</h3>
+
+    <p>
+        <strong>Student:</strong> {{ grievance.student.username }}
+    </p>
+
+    <p>
+        <strong>Category:</strong> {{ grievance.get_category_display }}
+    </p>
+
+    <p>
+        <strong>Description:</strong> {{ grievance.description }}
+    </p>
+
+    <p>
+        <strong>Current Status:</strong> {{ grievance.get_status_display }}
+    </p>
+
+    <h3>Status Change Records</h3>
+
+    {% if history %}
+        <table border="1" cellpadding="8" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Previous Status</th>
+                    <th>New Status</th>
+                    <th>Changed By</th>
+                    <th>Date and Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in history %}
+                    <tr>
+                        <td>{{ record.get_previous_status_display }}</td>
+                        <td>{{ record.get_new_status_display }}</td>
+                        <td>{{ record.staff.username|default:"Unknown" }}</td>
+                        <td>{{ record.changed_at }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No status changes have been recorded for this grievance yet.</p>
+    {% endif %}
+</body>
+</html>
