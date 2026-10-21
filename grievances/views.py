@@ -1,5 +1,6 @@
-﻿
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -9,7 +10,8 @@ from .models import Grievance, GrievanceHistory
 from accounts.decorators import role_required
 
 
-# Student: Submit a grievance
+# ---------------- STUDENT: Member 3 (CRUD) + Member 5 (search) ----------------
+
 @role_required('STUDENT')
 def submit_grievance(request):
     if request.method == 'POST':
@@ -35,21 +37,50 @@ def submit_grievance(request):
     )
 
 
-# Student: View own grievances
 @role_required('STUDENT')
 def my_grievances(request):
     grievances = Grievance.objects.filter(
         student=request.user
     ).order_by('-created_at')
 
+    # Get search and filter values
+    q = request.GET.get('q', '').strip()
+    status = request.GET.get('status', '')
+    category = request.GET.get('category', '')
+
+    # Search by title or description
+    if q:
+        grievances = grievances.filter(
+            Q(title__icontains=q) |
+            Q(description__icontains=q)
+        )
+
+    # Filter by status
+    if status:
+        grievances = grievances.filter(status=status)
+
+    # Filter by category
+    if category:
+        grievances = grievances.filter(category=category)
+
+    # Pagination: 5 per page
+    paginator = Paginator(grievances, 5)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
     return render(
         request,
         'grievances/my_grievances.html',
-        {'grievances': grievances}
+        {
+            'page_obj': page_obj,
+            'q': q,
+            'status': status,
+            'category': category,
+            'status_choices': Grievance.STATUS_CHOICES,
+            'category_choices': Grievance.CATEGORY_CHOICES,
+        }
     )
 
 
-# Student: Edit own grievance
 @role_required('STUDENT')
 def edit_grievance(request, pk):
     grievance = get_object_or_404(
@@ -85,9 +116,7 @@ def edit_grievance(request, pk):
     )
 
 
-# Student: Delete own grievance
 @role_required('STUDENT')
-@require_POST
 def delete_grievance(request, pk):
     grievance = get_object_or_404(
         Grievance,
@@ -95,16 +124,24 @@ def delete_grievance(request, pk):
         student=request.user
     )
 
-    grievance.delete()
+    if request.method == 'POST':
+        grievance.delete()
 
-    messages.success(
+        messages.success(
+            request,
+            'Grievance deleted successfully!'
+        )
+        return redirect('my_grievances')
+
+    return render(
         request,
-        'Grievance deleted successfully!'
+        'grievances/delete_grievance.html',
+        {'grievance': grievance}
     )
-    return redirect('my_grievances')
 
 
-# Staff: View all grievances
+# ---------------- STAFF: Member 4 (dashboard + status history) ----------------
+
 @role_required('STAFF')
 def staff_grievances(request):
     grievances = Grievance.objects.select_related(
@@ -114,11 +151,13 @@ def staff_grievances(request):
     return render(
         request,
         'grievances/staff_grievances.html',
-        {'grievances': grievances}
+        {
+            'grievances': grievances,
+            'status_choices': Grievance.STATUS_CHOICES,
+        }
     )
 
 
-# Staff: Update grievance status
 @role_required('STAFF')
 @require_POST
 def update_grievance_status(request, grievance_id):
@@ -132,10 +171,7 @@ def update_grievance_status(request, grievance_id):
         allowed_statuses = dict(Grievance.STATUS_CHOICES)
 
         if new_status not in allowed_statuses:
-            messages.error(
-                request,
-                'Please select a valid status.'
-            )
+            messages.error(request, 'Please select a valid status.')
             return redirect('staff_grievances')
 
         previous_status = grievance.status
@@ -164,13 +200,9 @@ def update_grievance_status(request, grievance_id):
     return redirect('staff_grievances')
 
 
-# Staff: View grievance status history
 @role_required('STAFF')
 def grievance_history(request, grievance_id):
-    grievance = get_object_or_404(
-        Grievance,
-        pk=grievance_id
-    )
+    grievance = get_object_or_404(Grievance, pk=grievance_id)
 
     history = grievance.history.select_related(
         'staff'
@@ -181,6 +213,6 @@ def grievance_history(request, grievance_id):
         'grievances/grievance_history.html',
         {
             'grievance': grievance,
-            'history': history
+            'history': history,
         }
     )
