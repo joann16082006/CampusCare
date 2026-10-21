@@ -1,4 +1,7 @@
+
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.contrib import messages
 
 from .forms import GrievanceForm
@@ -37,10 +40,42 @@ def my_grievances(request):
         student=request.user
     ).order_by('-created_at')
 
+    # Get search and filter values
+    q = request.GET.get('q', '').strip()
+    status = request.GET.get('status', '')
+    category = request.GET.get('category', '')
+
+    # Search by title or description
+    if q:
+        grievances = grievances.filter(
+            Q(title__icontains=q) |
+            Q(description__icontains=q)
+        )
+
+    # Filter by status
+    if status:
+        grievances = grievances.filter(status=status)
+
+    # Filter by category
+    if category:
+        grievances = grievances.filter(category=category)
+
+    # Show 5 grievances per page
+    page_obj = Paginator(grievances, 5).get_page(
+        request.GET.get('page')
+    )
+
     return render(
         request,
         'grievances/my_grievances.html',
-        {'grievances': grievances}
+        {
+            'page_obj': page_obj,
+            'q': q,
+            'status': status,
+            'category': category,
+            'status_choices': Grievance.STATUS_CHOICES,
+            'category_choices': Grievance.CATEGORY_CHOICES,
+        }
     )
 
 
