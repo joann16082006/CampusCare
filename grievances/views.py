@@ -2,6 +2,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.contrib import messages
 
 from .forms import GrievanceForm
 from .models import Grievance
@@ -17,6 +18,11 @@ def submit_grievance(request):
             grievance = form.save(commit=False)
             grievance.student = request.user
             grievance.save()
+
+            messages.success(
+                request,
+                'Grievance submitted successfully!'
+            )
             return redirect('my_grievances')
     else:
         form = GrievanceForm()
@@ -89,6 +95,11 @@ def edit_grievance(request, pk):
 
         if form.is_valid():
             form.save()
+
+            messages.success(
+                request,
+                'Grievance updated successfully!'
+            )
             return redirect('my_grievances')
     else:
         form = GrievanceForm(instance=grievance)
@@ -113,6 +124,11 @@ def delete_grievance(request, pk):
 
     if request.method == 'POST':
         grievance.delete()
+
+        messages.success(
+            request,
+            'Grievance deleted successfully!'
+        )
         return redirect('my_grievances')
 
     return render(
