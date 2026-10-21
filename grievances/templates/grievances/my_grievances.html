@@ -80,7 +80,12 @@
 
 <body>
 
-    <h1>My Grievances</h1>
+    <h1>My Grievances</h1> 
+      {% if messages %}
+     {% for message in messages %}
+       <p class="message">{{ message }}</p>
+     {% endfor %}
+   {% endif %}
 
     <!-- Search and Filters -->
     <form method="GET" action="{% url 'my_grievances' %}">
