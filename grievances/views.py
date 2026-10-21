@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from .forms import GrievanceForm
 from .models import Grievance
+from accounts.decorators import role_required
 
 
-@login_required
+@role_required('STUDENT')
 def submit_grievance(request):
     if request.method == 'POST':
         form = GrievanceForm(request.POST)
@@ -31,7 +31,7 @@ def submit_grievance(request):
     )
 
 
-@login_required
+@role_required('STUDENT')
 def my_grievances(request):
     grievances = Grievance.objects.filter(
         student=request.user
@@ -44,7 +44,7 @@ def my_grievances(request):
     )
 
 
-@login_required
+@role_required('STUDENT')
 def edit_grievance(request, pk):
     grievance = get_object_or_404(
         Grievance,
@@ -79,7 +79,7 @@ def edit_grievance(request, pk):
     )
 
 
-@login_required
+@role_required('STUDENT')
 def delete_grievance(request, pk):
     grievance = get_object_or_404(
         Grievance,
