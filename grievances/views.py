@@ -1,11 +1,12 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+
 from .forms import GrievanceForm
 from .models import Grievance
-from accounts.decorators import role_required
 
 
-@role_required('STUDENT')
+@login_required
 def submit_grievance(request):
     if request.method == 'POST':
         form = GrievanceForm(request.POST)
@@ -14,6 +15,11 @@ def submit_grievance(request):
             grievance = form.save(commit=False)
             grievance.student = request.user
             grievance.save()
+
+            messages.success(
+                request,
+                'Grievance submitted successfully!'
+            )
             return redirect('my_grievances')
     else:
         form = GrievanceForm()
@@ -25,7 +31,7 @@ def submit_grievance(request):
     )
 
 
-@role_required('STUDENT')
+@login_required
 def my_grievances(request):
     grievances = Grievance.objects.filter(
         student=request.user
@@ -38,7 +44,7 @@ def my_grievances(request):
     )
 
 
-@role_required('STUDENT')
+@login_required
 def edit_grievance(request, pk):
     grievance = get_object_or_404(
         Grievance,
@@ -54,6 +60,11 @@ def edit_grievance(request, pk):
 
         if form.is_valid():
             form.save()
+
+            messages.success(
+                request,
+                'Grievance updated successfully!'
+            )
             return redirect('my_grievances')
     else:
         form = GrievanceForm(instance=grievance)
@@ -68,7 +79,7 @@ def edit_grievance(request, pk):
     )
 
 
-@role_required('STUDENT')
+@login_required
 def delete_grievance(request, pk):
     grievance = get_object_or_404(
         Grievance,
@@ -78,6 +89,11 @@ def delete_grievance(request, pk):
 
     if request.method == 'POST':
         grievance.delete()
+
+        messages.success(
+            request,
+            'Grievance deleted successfully!'
+        )
         return redirect('my_grievances')
 
     return render(
