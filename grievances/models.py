@@ -25,6 +25,12 @@ class Grievance(models.Model):
     title = models.CharField(max_length=200)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     description = models.TextField()
+
+    # Student details (asked on the grievance form)
+    student_class = models.CharField(max_length=60, default='')
+    is_hostel = models.BooleanField(default=False)
+    room_number = models.CharField(max_length=20, blank=True, default='')
+
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
@@ -32,8 +38,12 @@ class Grievance(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # For the staff popup: False until staff open the grievance list
+    staff_seen = models.BooleanField(default=False)
+
     def __str__(self):
         return self.title
+
 
 class GrievanceHistory(models.Model):
     grievance = models.ForeignKey(
@@ -61,6 +71,9 @@ class GrievanceHistory(models.Model):
     )
 
     changed_at = models.DateTimeField(auto_now_add=True)
+
+    # For the student popup: False until the student has seen this update
+    student_notified = models.BooleanField(default=False)
 
     def __str__(self):
         return (

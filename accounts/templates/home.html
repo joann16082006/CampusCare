@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}CampusCare - College Grievance Management{% endblock %}
+
+{% block content %}
+
+<!-- Top bar (only for visitors who are not logged in) -->
+{% if not user.is_authenticated %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="fs-4 fw-bold" style="color: var(--cc-primary);">
+        <i class="bi bi-mortarboard-fill me-2"></i>CampusCare
+    </span>
+    <div class="d-flex gap-2">
+        <a href="{% url 'login' %}" class="btn btn-outline-cc">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-cc">Register</a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Hero -->
+<section class="cc-hero rounded-4 p-4 p-md-5 mb-5 text-white">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="badge cc-role-badge mb-3 px-3 py-2">College Grievance Management System</span>
+            <h1 class="display-5 fw-bold mb-3">Raise it. Track it. Get it resolved.</h1>
+            <p class="lead mb-4 text-white-50">
+                CampusCare lets students report campus problems online, and lets staff
+                track and resolve every complaint, with a full record of each update.
+            </p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg fw-semibold">
+                    <i class="bi bi-speedometer2 me-1"></i>Go to Dashboard
+                </a>
+            {% else %}
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'register' %}" class="btn btn-light btn-lg fw-semibold">
+                        <i class="bi bi-person-plus me-1"></i>Get Started
+                    </a>
+                    <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-lg-5 text-center d-none d-lg-block">
+            <i class="bi bi-chat-square-text cc-hero-icon"></i>
+        </div>
+    </div>
+</section>
+
+<!-- About -->
+<section class="mb-5">
+    <p class="cc-section-title mb-1">About</p>
+    <h2 class="cc-page-title mb-3">Why CampusCare?</h2>
+    <p class="text-muted col-lg-9">
+        In many colleges, complaints about classrooms, hostels, transport and academics
+        are made on paper or by word of mouth. They get lost, students never know if
+        anyone is working on them, and there is no record of who handled what.
+        CampusCare puts the whole process online, so every grievance is tracked from
+        submission to resolution.
+    </p>
+</section>
+
+<!-- Features -->
+<section class="mb-5">
+    <p class="cc-section-title mb-1">Features</p>
+    <h2 class="cc-page-title mb-4">What you can do</h2>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card cc-card h-100 p-4">
+                <i class="bi bi-pencil-square cc-feature-icon"></i>
+                <h3 class="h5 mt-3">Submit online</h3>
+                <p class="text-muted mb-0">Report a problem in under a minute, by category.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card cc-card h-100 p-4">
+                <i class="bi bi-graph-up-arrow cc-feature-icon"></i>
+                <h3 class="h5 mt-3">Track status</h3>
+                <p class="text-muted mb-0">See when your grievance is Pending, In Progress or Resolved.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card cc-card h-100 p-4">
+                <i class="bi bi-people cc-feature-icon"></i>
+                <h3 class="h5 mt-3">Staff dashboard</h3>
+                <p class="text-muted mb-0">Staff see every complaint and update it in one place.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card cc-card h-100 p-4">
+                <i class="bi bi-shield-lock cc-feature-icon"></i>
+                <h3 class="h5 mt-3">Secure and private</h3>
+                <p class="text-muted mb-0">Students see only their own grievances. Every change is recorded.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it works -->
+<section class="mb-5">
+    <p class="cc-section-title mb-1">How it works</p>
+    <h2 class="cc-page-title mb-4">Three simple steps</h2>
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="cc-step mx-auto mb-3">1</div>
+            <h3 class="h5">Student submits</h3>
+            <p class="text-muted">Choose a category and describe the problem.</p>
+        </div>
+        <div class="col-md-4">
+            <div class="cc-step mx-auto mb-3">2</div>
+            <h3 class="h5">Staff take action</h3>
+            <p class="text-muted">Staff move it to In Progress and work on it.</p>
+        </div>
+        <div class="col-md-4">
+            <div class="cc-step mx-auto mb-3">3</div>
+            <h3 class="h5">Issue resolved</h3>
+            <p class="text-muted">The student is notified when the status changes.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="mb-5">
+    <p class="cc-section-title mb-1">Categories</p>
+    <div class="d-flex flex-wrap gap-2 mt-2">
+        <span class="badge cc-chip"><i class="bi bi-book me-1"></i>Academic</span>
+        <span class="badge cc-chip"><i class="bi bi-building me-1"></i>Facility</span>
+        <span class="badge cc-chip"><i class="bi bi-house-door me-1"></i>Hostel</span>
+        <span class="badge cc-chip"><i class="bi bi-bus-front me-1"></i>Transport</span>
+        <span class="badge cc-chip"><i class="bi bi-three-dots me-1"></i>Other</span>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="border-top pt-4 text-center text-muted small">
+    CampusCare · Built by Ann Jyotsna S, Charishma P, Karthini G, Gnana Salini J and Harini M
+</footer>
+
+{% endblock %}

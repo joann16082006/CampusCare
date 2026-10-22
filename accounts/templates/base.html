@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CampusCare{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'campuscare/style.css' %}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+    {% if user.is_authenticated %}
+    <nav class="navbar navbar-expand-lg navbar-dark cc-navbar shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">
+                <i class="bi bi-mortarboard-fill me-2"></i>CampusCare
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
+                    </li>
+                    {% if user.profile.role == 'STUDENT' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'submit_grievance' %}"><i class="bi bi-plus-circle me-1"></i>New Grievance</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'my_grievances' %}"><i class="bi bi-card-list me-1"></i>My Grievances</a>
+                        </li>
+                    {% elif user.profile.role == 'STAFF' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'staff_grievances' %}"><i class="bi bi-inboxes me-1"></i>All Grievances</a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                <div class="d-flex align-items-center gap-3">
+                    {% if user.profile.role == 'STAFF' %}
+                        <a href="{% url 'staff_grievances' %}" class="cc-bell position-relative" title="New grievances">
+                            <i class="bi bi-bell-fill"></i>
+                            {% if new_grievance_count %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ new_grievance_count }}</span>
+                            {% endif %}
+                        </a>
+                    {% endif %}
+                    <span class="text-white-50 small">
+                        <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+                        <span class="badge cc-role-badge ms-1">{{ user.profile.get_role_display }}</span>
+                    </span>
+                    <form method="post" action="{% url 'logout' %}" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-light">
+                            <i class="bi bi-box-arrow-right me-1"></i>Log Out
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+        <main class="container py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Popups (toasts) -->
+    <div class="toast-container position-fixed top-0 end-0 p-3 mt-5">
+
+        {% if new_grievance_count %}
+            <div class="toast border-0 cc-toast cc-toast-warning" role="alert" data-bs-delay="10000">
+                <div class="d-flex align-items-center">
+                    <div class="toast-body">
+                        <i class="bi bi-bell-fill me-2"></i>
+                        <b>{{ new_grievance_count }} new grievance{{ new_grievance_count|pluralize }} received</b>
+                    </div>
+                    <a href="{% url 'staff_grievances' %}" class="btn btn-sm btn-light me-2">View</a>
+                    <button type="button" class="btn-close btn-close-white me-2" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        {% endif %}
+
+        {% for update in status_updates %}
+            <div class="toast border-0 cc-toast cc-toast-info" role="alert" data-bs-delay="10000">
+                <div class="d-flex align-items-center">
+                    <div class="toast-body">
+                        <i class="bi bi-megaphone-fill me-2"></i>
+                        Your grievance <b>“{{ update.grievance.title }}”</b> is now <b>{{ update.get_new_status_display }}</b>
+                    </div>
+                    <a href="{% url 'grievance_detail' update.grievance.pk %}" class="btn btn-sm btn-light me-2">View</a>
+                    <button type="button" class="btn-close btn-close-white me-2" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% for message in messages %}
+            <div class="toast align-items-center border-0 cc-toast cc-toast-{{ message.tags|default:'info' }}" role="alert" data-bs-delay="6000">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.toast').forEach(function (el) {
+            new bootstrap.Toast(el).show();
+        });
+    </script>
+</body>
+</html>

@@ -1,28 +1,164 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>CampusCare Dashboard</title>
-</head>
-<body>
-    <h1>CampusCare Dashboard</h1>
+{% extends "base.html" %}
 
-    <h2>Welcome, {{ request.user.username }}!</h2>
-    <p>Role: {{ request.user.profile.get_role_display }}</p>
+{% block title %}Dashboard - CampusCare{% endblock %}
 
-    {% if role == 'STUDENT' %}
-        <h3>Student Services</h3>
-        <p><a href="{% url 'submit_grievance' %}">Submit a Grievance</a></p>
-        <p><a href="{% url 'my_grievances' %}">View My Grievances</a></p>
-    {% endif %}
+{% block content %}
 
-    {% if role == 'STAFF' %}
-        <h3>Staff Services</h3>
-        <p><a href="{% url 'staff_grievances' %}">Manage Grievances</a></p>
-    {% endif %}
+<!-- Welcome banner -->
+<div class="cc-hero rounded-4 p-4 p-md-5 mb-4 text-white">
+    <div class="row align-items-center g-3">
+        <div class="col-md-8">
+            <p class="mb-1 text-white-50">
+                {% if role == 'STUDENT' %}Student Dashboard{% else %}Staff Dashboard{% endif %}
+            </p>
+            <h1 class="fw-bold mb-2">Welcome back, {{ user.username }}!</h1>
+            <p class="mb-0 text-white-50">
+                {% if role == 'STUDENT' %}
+                    Track your grievances and see updates from staff.
+                {% else %}
+                    Review new grievances and keep students updated.
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            {% if role == 'STUDENT' %}
+                <a href="{% url 'submit_grievance' %}" class="btn btn-light btn-lg fw-semibold">
+                    <i class="bi bi-plus-circle me-1"></i>New Grievance
+                </a>
+            {% else %}
+                <a href="{% url 'staff_grievances' %}" class="btn btn-light btn-lg fw-semibold">
+                    <i class="bi bi-inboxes me-1"></i>Manage Grievances
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
 
-    <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit">Log Out</button>
-    </form>
-</body>
-</html>
+<!-- Stat cards -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card cc-stat cc-stat-total h-100">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-white-50 text-uppercase fw-semibold">Total</div>
+                    <div class="cc-stat-number">{{ stats.total }}</div>
+                </div>
+                <i class="bi bi-collection cc-stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card cc-stat cc-stat-pending h-100">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-white-50 text-uppercase fw-semibold">Pending</div>
+                    <div class="cc-stat-number">{{ stats.pending }}</div>
+                </div>
+                <i class="bi bi-hourglass-split cc-stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card cc-stat cc-stat-progress h-100">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-white-50 text-uppercase fw-semibold">In Progress</div>
+                    <div class="cc-stat-number">{{ stats.in_progress }}</div>
+                </div>
+                <i class="bi bi-arrow-repeat cc-stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card cc-stat cc-stat-resolved h-100">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-white-50 text-uppercase fw-semibold">Resolved</div>
+                    <div class="cc-stat-number">{{ stats.resolved }}</div>
+                </div>
+                <i class="bi bi-check2-circle cc-stat-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Recent grievances -->
+    <div class="col-lg-8">
+        <div class="card cc-card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 mb-0 cc-page-title">Recent Grievances</h2>
+                    {% if role == 'STUDENT' %}
+                        <a href="{% url 'my_grievances' %}" class="btn btn-sm btn-outline-cc">View all</a>
+                    {% else %}
+                        <a href="{% url 'staff_grievances' %}" class="btn btn-sm btn-outline-cc">View all</a>
+                    {% endif %}
+                </div>
+
+                {% if recent %}
+                    <div class="table-responsive">
+                        <table class="table align-middle cc-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    {% if role != 'STUDENT' %}<th>Student</th>{% endif %}
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for g in recent %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ g.title }}</td>
+                                        {% if role != 'STUDENT' %}<td>{{ g.student.username }}</td>{% endif %}
+                                        <td>{{ g.get_category_display }}</td>
+                                        <td><span class="badge cc-badge cc-badge-{{ g.status }}">{{ g.get_status_display }}</span></td>
+                                        <td class="text-muted small">{{ g.created_at|date:"d M Y, H:i" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        No grievances yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="col-lg-4">
+        <div class="card cc-card cc-card-accent h-100">
+            <div class="card-body p-4">
+                <h2 class="h5 mb-3 cc-page-title">Quick Actions</h2>
+                <div class="d-grid gap-2">
+                    {% if role == 'STUDENT' %}
+                        <a href="{% url 'submit_grievance' %}" class="btn btn-cc">
+                            <i class="bi bi-plus-circle me-1"></i>Submit a Grievance
+                        </a>
+                        <a href="{% url 'my_grievances' %}" class="btn btn-outline-cc">
+                            <i class="bi bi-card-list me-1"></i>View My Grievances
+                        </a>
+                    {% else %}
+                        <a href="{% url 'staff_grievances' %}" class="btn btn-cc">
+                            <i class="bi bi-inboxes me-1"></i>Manage All Grievances
+                        </a>
+                    {% endif %}
+                </div>
+
+                <hr>
+
+                <p class="cc-section-title mb-2">Your profile</p>
+                <p class="mb-1"><i class="bi bi-person me-2"></i>{{ user.username }}</p>
+                <p class="mb-0"><i class="bi bi-person-badge me-2"></i>{{ user.profile.get_role_display }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

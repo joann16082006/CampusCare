@@ -1,0 +1,212 @@
+/* ===== CampusCare theme (works with Bootstrap 5) ===== */
+
+:root {
+    --cc-primary: #46468c;
+    --cc-primary-dark: #2f2f66;
+    --cc-tint: #e9e8f5;
+    --cc-accent: #d9733a;
+    --cc-accent-text: #b4561c;
+    --cc-text: #1e2440;
+    --cc-bg: #f4f4fa;
+}
+
+body {
+    background: var(--cc-bg);
+    color: var(--cc-text);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* ---------- Navbar ---------- */
+.cc-navbar {
+    background: linear-gradient(90deg, var(--cc-primary-dark), var(--cc-primary));
+    border-bottom: 4px solid var(--cc-accent);
+}
+.cc-navbar .nav-link { color: rgba(255, 255, 255, 0.85); }
+.cc-navbar .nav-link:hover { color: #ffffff; }
+.cc-role-badge { background: var(--cc-accent); }
+
+/* ---------- Headings ---------- */
+.cc-page-title { color: var(--cc-primary); font-weight: 700; }
+.cc-section-title {
+    color: var(--cc-accent-text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* ---------- Buttons ---------- */
+.btn-cc {
+    background: var(--cc-primary);
+    border-color: var(--cc-primary);
+    color: #ffffff;
+}
+.btn-cc:hover { background: var(--cc-primary-dark); border-color: var(--cc-primary-dark); color: #ffffff; }
+.btn-outline-cc { border-color: var(--cc-primary); color: var(--cc-primary); }
+.btn-outline-cc:hover { background: var(--cc-primary); color: #ffffff; }
+
+/* ---------- Cards ---------- */
+.cc-card {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(30, 36, 64, 0.07);
+}
+.cc-card-accent { border-top: 5px solid var(--cc-accent); }
+
+/* ---------- Stat cards (dashboard) ---------- */
+.cc-stat {
+    border: none;
+    border-radius: 14px;
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(30, 36, 64, 0.12);
+}
+.cc-stat .cc-stat-number { font-size: 2.2rem; font-weight: 700; line-height: 1; }
+.cc-stat .cc-stat-icon { font-size: 2.4rem; opacity: 0.35; }
+.cc-stat-total    { background: linear-gradient(135deg, #46468c, #6a6ab8); }
+.cc-stat-pending  { background: linear-gradient(135deg, #c2621f, #e08a4f); }
+.cc-stat-progress { background: linear-gradient(135deg, #1f6fb2, #4a95d6); }
+.cc-stat-resolved { background: linear-gradient(135deg, #1e7a45, #3fa56a); }
+
+/* ---------- Status badges ---------- */
+.cc-badge { font-weight: 600; padding: 0.4em 0.75em; border-radius: 999px; }
+.cc-badge-PENDING     { background: #fdebd9; color: #9a4a12; }
+.cc-badge-IN_PROGRESS { background: #dcebfa; color: #18558a; }
+.cc-badge-RESOLVED    { background: #dcf3e5; color: #1a6a3c; }
+
+/* ---------- Tables ---------- */
+.cc-table thead th {
+    background: var(--cc-tint);
+    color: var(--cc-text);
+    border-bottom: 2px solid var(--cc-primary);
+}
+.cc-table a { color: var(--cc-primary); font-weight: 600; text-decoration: none; }
+.cc-table a:hover { color: var(--cc-accent-text); text-decoration: underline; }
+
+/* ---------- Toast popups ---------- */
+.cc-toast { color: #ffffff; min-width: 280px; }
+.cc-toast-success { background: #1e7a45; }
+.cc-toast-info    { background: var(--cc-primary); }
+.cc-toast-warning { background: #c2621f; }
+.cc-toast-error   { background: #b3261e; }
+
+/* ---------- Login / register ---------- */
+.cc-auth-bg {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--cc-primary-dark), var(--cc-primary) 60%, var(--cc-accent));
+}
+/* ---------- Forms rendered with {{ form.as_p }} ---------- */
+.cc-form p { margin-bottom: 1rem; }
+.cc-form label { display: block; font-weight: 600; margin-bottom: 0.35rem; }
+.cc-form input[type="text"],
+.cc-form input[type="password"],
+.cc-form input[type="email"],
+.cc-form input[type="number"],
+.cc-form select,
+.cc-form textarea {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #d0d2e0;
+    border-radius: 0.5rem;
+    background: #fbfbfd;
+    font-size: 1rem;
+}
+.cc-form textarea { min-height: 130px; }
+.cc-form input:focus,
+.cc-form select:focus,
+.cc-form textarea:focus {
+    outline: none;
+    border-color: var(--cc-accent);
+    box-shadow: 0 0 0 0.2rem rgba(217, 115, 58, 0.2);
+}
+.cc-form .helptext { display: block; font-size: 0.85rem; color: #6b7088; margin-top: 0.25rem; }
+.cc-form ul.errorlist { color: #b3261e; padding-left: 1rem; margin-bottom: 0.4rem; font-size: 0.9rem; }
+/* ---------- Landing page ---------- */
+.cc-hero {
+    background: linear-gradient(135deg, var(--cc-primary-dark), var(--cc-primary) 55%, var(--cc-accent));
+    box-shadow: 0 12px 30px rgba(30, 36, 64, 0.18);
+}
+.cc-hero-icon { font-size: 11rem; opacity: 0.25; }
+.cc-feature-icon {
+    font-size: 2rem;
+    color: var(--cc-primary);
+    background: var(--cc-tint);
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cc-step {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--cc-accent);
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cc-chip {
+    background: var(--cc-tint);
+    color: var(--cc-primary);
+    font-size: 0.95rem;
+    padding: 0.6em 1em;
+    border-radius: 999px;
+}
+/* ---------- Detail page ---------- */
+.cc-info-box {
+    background: var(--cc-tint);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+}
+.cc-timeline { position: relative; padding-left: 1.5rem; }
+.cc-timeline::before {
+    content: "";
+    position: absolute;
+    left: 0.4rem;
+    top: 0.3rem;
+    bottom: 0.3rem;
+    width: 2px;
+    background: var(--cc-tint);
+}
+.cc-timeline li { position: relative; padding-bottom: 1.1rem; }
+.cc-timeline li:last-child { padding-bottom: 0; }
+.cc-timeline li::before {
+    content: "";
+    position: absolute;
+    left: -1.45rem;
+    top: 0.35rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--cc-accent);
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 2px var(--cc-accent);
+}
+
+/* ---------- Pagination colours ---------- */
+.pagination .page-link { color: var(--cc-primary); }
+.pagination .page-item.active .page-link {
+    background: var(--cc-primary);
+    border-color: var(--cc-primary);
+    color: #ffffff;
+}
+/* ---------- Links in theme colour ---------- */
+a { color: var(--cc-primary); }
+a:hover { color: var(--cc-accent-text); }
+/* ---------- Checkbox in forms ---------- */
+.cc-form input[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+    accent-color: var(--cc-primary);
+}
+/* ---------- Notification bell (staff) ---------- */
+.cc-bell { color: #ffffff; font-size: 1.25rem; text-decoration: none; }
+.cc-bell:hover { color: var(--cc-accent); }
+.cc-toast .btn-light { white-space: nowrap; }
