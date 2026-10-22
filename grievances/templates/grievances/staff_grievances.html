@@ -1,69 +1,113 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusCare - Staff Grievances</title>
-</head>
-<body>
-    <h1>CampusCare</h1>
-    <h2>Staff Grievance Dashboard</h2>
+{% extends "base.html" %}
 
-    <p>
-        <a href="{% url 'dashboard' %}">Back to Dashboard</a>
-    </p>
+{% block title %}All Grievances - CampusCare{% endblock %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+{% block content %}
 
-    {% if grievances %}
-        <table border="1" cellpadding="8" cellspacing="0">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Student</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Submitted</th>
-                    <th>Status</th>
-                    <th>Update Status</th>
-                    <th>History</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for grievance in grievances %}
-                    <tr>
-                        <td>{{ grievance.title }}</td>
-                        <td>{{ grievance.student.username }}</td>
-                        <td>{{ grievance.get_category_display }}</td>
-                        <td>{{ grievance.description }}</td>
-                        <td>{{ grievance.created_at }}</td>
-                        <td>{{ grievance.get_status_display }}</td>
-                        <td>
-                            <form method="post" action="{% url 'update_grievance_status' grievance.id %}">
-                                {% csrf_token %}
-                                <select name="status" required>
-                                    {% for value, label in grievance.STATUS_CHOICES %}
-                                        <option value="{{ value }}" {% if grievance.status == value %}selected{% endif %}>
-                                            {{ label }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit">Save</button>
-                            </form>
-                        </td>
-                        <td>
-                            <a href="{% url 'grievance_history' grievance.id %}">View History</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No grievances have been submitted yet.</p>
-    {% endif %}
-</body>
-</html>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <p class="cc-section-title mb-1">Staff</p>
+        <h1 class="cc-page-title h2 mb-0">All Grievances</h1>
+    </div>
+</div>
+
+<!-- Search and filter -->
+<div class="card cc-card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{% url 'staff_grievances' %}" class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search by title, description or student" value="{{ q }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-cc flex-fill"><i class="bi bi-funnel me-1"></i>Filter</button>
+                <a href="{% url 'staff_grievances' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card cc-card">
+    <div class="card-body p-0">
+        {% if page_obj.object_list %}
+            <div class="table-responsive">
+                <table class="table align-middle cc-table mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Title</th>
+                            <th>Student</th>
+                            <th>Category</th>
+                            <th>Class / Room</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th class="pe-4">Update Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grievance in page_obj %}
+                            <tr>
+                                <td class="ps-4">
+                                    <a href="{% url 'grievance_detail' grievance.pk %}">{{ grievance.title }}</a>
+                                    <div class="small text-muted text-truncate" style="max-width: 280px;">{{ grievance.description }}</div>
+                                </td>
+                                <td>{{ grievance.student.username }}</td>
+                                <td>{{ grievance.get_category_display }}</td>
+                                <td>
+                                    {{ grievance.student_class|default:"—" }}
+                                    {% if grievance.is_hostel %}<div class="small text-muted"><i class="bi bi-house-door me-1"></i>Room {{ grievance.room_number }}</div>{% endif %}
+                                </td>
+                                <td><span class="badge cc-badge cc-badge-{{ grievance.status }}">{{ grievance.get_status_display }}</span></td>
+                                <td class="text-muted small">{{ grievance.created_at|date:"d M Y, H:i" }}</td>
+                                <td class="pe-4">
+                                    <form method="post" action="{% url 'update_grievance_status' grievance.pk %}" class="d-flex gap-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        <select name="status" class="form-select form-select-sm" style="min-width: 130px;">
+                                            {% for value, label in status_choices %}
+                                                <option value="{{ value }}" {% if grievance.status == value %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-cc">Save</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+                {% else %}
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                No grievances found.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?q={{ q|urlencode }}&status={{ status|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?q={{ q|urlencode }}&status={{ status|urlencode }}&page={{ page_obj.next_page_number }}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

@@ -1,18 +1,52 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Submit Grievance - CampusCare</title>
-</head>
-<body>
-    <h1>Submit a Grievance</h1>
+{% extends "base.html" %}
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit Grievance</button>
-    </form>
+{% block title %}Submit Grievance - CampusCare{% endblock %}
 
-    <p><a href="{% url 'my_grievances' %}">View My Grievances</a></p>
-    <p><a href="{% url 'dashboard' %}">Back to Dashboard</a></p>
-</body>
-</html>
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <a href="{% url 'dashboard' %}" class="text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+        </a>
+
+        <div class="card cc-card cc-card-accent mt-3">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="cc-feature-icon"><i class="bi bi-pencil-square"></i></div>
+                    <div>
+                        <h1 class="cc-page-title h3 mb-0">Submit a Grievance</h1>
+                        <p class="text-muted mb-0">Describe the problem and we’ll get it to the right staff.</p>
+                    </div>
+                </div>
+
+                <form method="post" class="cc-form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-cc px-4">
+                            <i class="bi bi-send me-1"></i>Submit Grievance
+                        </button>
+                        <a href="{% url 'my_grievances' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    (function () {
+        var hostel = document.getElementById('id_is_hostel');
+        var room = document.getElementById('id_room_number');
+        if (!hostel || !room) return;
+        var roomRow = room.closest('p');
+        function toggleRoom() {
+            roomRow.style.display = hostel.checked ? '' : 'none';
+        }
+        hostel.addEventListener('change', toggleRoom);
+        toggleRoom();
+    })();
+</script>
+{% endblock %}

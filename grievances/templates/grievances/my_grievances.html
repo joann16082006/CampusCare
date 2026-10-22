@@ -1,232 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Grievances - CampusCare</title>
+{% extends "base.html" %}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background-color: #f5f6fa;
-            color: #333;
-        }
+{% block title %}My Grievances - CampusCare{% endblock %}
 
-        h1 {
-            color: #4a4a8a;
-        }
+{% block content %}
 
-        form {
-            margin: 20px 0;
-        }
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <p class="cc-section-title mb-1">Student</p>
+        <h1 class="cc-page-title h2 mb-0">My Grievances</h1>
+    </div>
+    <a href="{% url 'submit_grievance' %}" class="btn btn-cc">
+        <i class="bi bi-plus-circle me-1"></i>New Grievance
+    </a>
+</div>
 
-        input, select, button {
-            padding: 10px;
-            margin: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+<!-- Search and filters -->
+<div class="card cc-card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{% url 'my_grievances' %}" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search by title or description" value="{{ q }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for value, label in category_choices %}
+                        <option value="{{ value }}" {% if category == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-cc flex-fill"><i class="bi bi-funnel me-1"></i>Filter</button>
+                <a href="{% url 'my_grievances' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
 
-        button {
-            background-color: #4a4a8a;
-            color: white;
-            cursor: pointer;
-        }
+<!-- Table -->
+<div class="card cc-card">
+    <div class="card-body p-0">
+        {% if page_obj.object_list %}
+            <div class="table-responsive">
+                <table class="table align-middle cc-table mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Title</th>
+                            <th>Category</th>
+                            <th>Class / Room</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grievance in page_obj %}
+                            <tr>
+                                <td class="ps-4">
+                                    <a href="{% url 'grievance_detail' grievance.pk %}">{{ grievance.title }}</a>
+                                    <div class="small text-muted text-truncate" style="max-width: 320px;">{{ grievance.description }}</div>
+                                </td>
+                                <td>{{ grievance.get_category_display }}</td>
+                                <td>
+                                    {{ grievance.student_class|default:"—" }}
+                                    {% if grievance.is_hostel %}<div class="small text-muted"><i class="bi bi-house-door me-1"></i>Room {{ grievance.room_number }}</div>{% endif %}
+                                </td>
+                                <td><span class="badge cc-badge cc-badge-{{ grievance.status }}">{{ grievance.get_status_display }}</span></td>
+                                <td class="text-muted small">{{ grievance.created_at|date:"d M Y, H:i" }}</td>
+                                <td class="text-end pe-4">
+                                    <a href="{% url 'grievance_detail' grievance.pk %}" class="btn btn-sm btn-outline-cc" title="View"><i class="bi bi-eye"></i></a>
+                                    <a href="{% url 'edit_grievance' grievance.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                                    <a href="{% url 'delete_grievance' grievance.pk %}" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                No grievances found. Try another search or submit a new grievance.
+            </div>
+        {% endif %}
+    </div>
+</div>
 
-        button:hover {
-            background-color: #35356e;
-        }
+<!-- Pagination -->
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?q={{ q|urlencode }}&status={{ status|urlencode }}&category={{ category|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?q={{ q|urlencode }}&status={{ status|urlencode }}&category={{ category|urlencode }}&page={{ page_obj.next_page_number }}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: white;
-            margin-top: 20px;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #e8e8f5;
-        }
-
-        a {
-            color: #4a4a8a;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .pagination {
-            margin-top: 20px;
-        }
-
-        .pagination a {
-            margin: 0 8px;
-        }
-
-        .message {
-            margin-top: 20px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <h1>My Grievances</h1> 
-      {% if messages %}
-     {% for message in messages %}
-       <p class="message">{{ message }}</p>
-     {% endfor %}
-   {% endif %}
-
-    <!-- Search and Filters -->
-    <form method="GET" action="{% url 'my_grievances' %}">
-
-        <input
-            type="text"
-            name="q"
-            placeholder="Search by title or description"
-            value="{{ q }}"
-        >
-
-        <select name="status">
-            <option value="">All Statuses</option>
-
-            {% for value, label in status_choices %}
-                <option value="{{ value }}"
-                    {% if status == value %}selected{% endif %}>
-                    {{ label }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <select name="category">
-            <option value="">All Categories</option>
-
-            {% for value, label in category_choices %}
-                <option value="{{ value }}"
-                    {% if category == value %}selected{% endif %}>
-                    {{ label }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <button type="submit">Search / Filter</button>
-
-        <a href="{% url 'my_grievances' %}">Clear Filters</a>
-
-    </form>
-
-    <!-- Grievance Table -->
-    {% if page_obj.object_list %}
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Submitted On</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for grievance in page_obj %}
-                    <tr>
-                        <td>{{ grievance.title }}</td>
-
-                        <td>
-                            {{ grievance.get_category_display }}
-                        </td>
-
-                        <td>
-                            {{ grievance.description }}
-                        </td>
-
-                        <td>
-                            {{ grievance.get_status_display }}
-                        </td>
-
-                        <td>
-                            {{ grievance.created_at|date:"d-m-Y H:i" }}
-                        </td>
-
-                        <td>
-                            <a href="{% url 'edit_grievance' grievance.pk %}">
-                                Edit
-                            </a>
-
-                            |
-
-                            <a href="{% url 'delete_grievance' grievance.pk %}">
-                                Delete
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- Pagination -->
-        <div class="pagination">
-
-            {% if page_obj.has_previous %}
-                <a href="?q={{ q|urlencode }}&status={{ status|urlencode }}&category={{ category|urlencode }}&page=1">
-                    First
-                </a>
-
-                <a href="?q={{ q|urlencode }}&status={{ status|urlencode }}&category={{ category|urlencode }}&page={{ page_obj.previous_page_number }}">
-                    Previous
-                </a>
-            {% endif %}
-
-            <span>
-                Page {{ page_obj.number }}
-                of {{ page_obj.paginator.num_pages }}
-            </span>
-
-            {% if page_obj.has_next %}
-                <a href="?q={{ q|urlencode }}&status={{ status|urlencode }}&category={{ category|urlencode }}&page={{ page_obj.next_page_number }}">
-                    Next
-                </a>
-
-                <a href="?q={{ q|urlencode }}&status={{ status|urlencode }}&category={{ category|urlencode }}&page={{ page_obj.paginator.num_pages }}">
-                    Last
-                </a>
-            {% endif %}
-
-        </div>
-
-    {% else %}
-
-        <p class="message">
-            No grievances found. Try another search or submit a new grievance.
-        </p>
-
-    {% endif %}
-
-    <!-- Navigation Links -->
-    <p>
-        <a href="{% url 'submit_grievance' %}">
-            Submit a New Grievance
-        </a>
-    </p>
-
-    <p>
-        <a href="{% url 'dashboard' %}">
-            Back to Dashboard
-        </a>
-    </p>
-
-</body>
-</html>
+{% endblock %}
